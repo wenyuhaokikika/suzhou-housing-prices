@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>吴中 · 奉贤 房价看板</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root { --bg:#0f1419; --card:#1a2332; --text:#e7ecf3; --muted:#8b9bb4; --accent:#3d8bfd; --good:#3dd68c; --warn:#f5a524; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background:var(--bg); color:var(--text); }
+    header { padding:24px 32px; border-bottom:1px solid #243044; }
+    header h1 { margin:0 0 6px; font-size:1.6rem; }
+    header p { margin:0; color:var(--muted); }
+    main { padding:24px 32px; max-width:1200px; margin:0 auto; }
+    .grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:16px; margin-bottom:24px; }
+    .card { background:var(--card); border-radius:12px; padding:16px 18px; border:1px solid #243044; }
+    .card .label { color:var(--muted); font-size:0.85rem; }
+    .card .value { font-size:1.6rem; font-weight:700; margin-top:6px; }
+    .section { margin-bottom:28px; }
+    .section h2 { font-size:1.15rem; margin:0 0 12px; }
+    table { width:100%; border-collapse:collapse; font-size:0.92rem; }
+    th, td { text-align:left; padding:10px 8px; border-bottom:1px solid #243044; }
+    th { color:var(--muted); font-weight:600; }
+    .muted { color:var(--muted); }
+    a { color:var(--accent); }
+    canvas { max-height:320px; }
+    .badge { display:inline-block; padding:2px 8px; border-radius:999px; font-size:0.75rem; background:#243044; }
+    .badge.ok { background:#163528; color:var(--good); }
+    .badge.blocked, .badge.error { background:#3a2418; color:var(--warn); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>苏州吴中 · 上海奉贤 房价看板</h1>
+    <p>近三年挂牌 / 成交 / 小区跟踪 · API 文档见 <a href="/docs">/docs</a></p>
+  </header>
+  <main>
+    <div class="grid">
+      <div class="card"><div class="label">小区</div><div class="value">{{ overview.communities }}</div></div>
+      <div class="card"><div class="label">在售挂牌</div><div class="value">{{ overview.listings }}</div></div>
+      <div class="card"><div class="label">成交记录</div><div class="value">{{ overview.transactions }}</div></div>
+      <div class="card"><div class="label">价格快照</div><div class="value">{{ overview.snapshots }}</div></div>
+      <div class="card"><div class="label">关注小区</div><div class="value">{{ overview.watchlist }}</div></div>
+    </div>
+
+    <div class="section card">
+      <h2>区域对比</h2>
+      <p>{{ compare.summary_zh }}</p>
+      <table>
+        <thead>
+          <tr><th>区域</th><th>均价(元/㎡)</th><th>小区数</th><th>挂牌</th><th>成交</th></tr>
+        </thead>
+        <tbody>
+          {% for r in compare.regions %}
+          <tr>
+            <td>{{ r.city }}{{ r.district }}</td>
+            <td>{{ r.avg_unit_price or '-' }}</td>
+            <td>{{ r.communities }}</td>
+            <td>{{ r.listings }}</td>
+            <td>{{ r.transactions }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section card">
+      <h2>示例小区单价趋势（近24个月）</h2>
+      <canvas id="trendChart"></canvas>
+      <p class="muted" style="margin-top:8px;">
+        {% for code, s in series.items() %}
+          {{ code }}: {{ s.name }}{% if not loop.last %} · {% endif %}
+        {% endfor %}
+      </p>
+    </div>
+
+    <div class="section card">
+      <h2>最近爬取任务</h2>
+      <table>
+        <thead>
+          <tr><th>时间</th><th>区域</th><th>来源</th><th>模式</th><th>状态</th><th>挂牌+</th><th>成交+</th></tr>
+        </thead>
+        <tbody>
+          {% for run in runs %}
+          <tr>
+            <td>{{ run.started_at }}</td>
+            <td>{{ run.region_code }}</td>
+            <td>{{ run.source }}</td>
+            <td>{{ run.mode }}</td>
+            <td><span class="badge {{ run.status }}">{{ run.status }}</span></td>
+            <td>{{ run.listings_upserted }}</td>
+            <td>{{ run.txns_upserted }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="7" class="muted">暂无爬取记录，请先运行 python -m scrapers.run --demo</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    const series = {{ series | tojson }};
+    const colors = { wuzhong: '#3d8bfd', fengxian: '#3dd68c' };
+    const datasets = [];
+    for (const [code, s] of Object.entries(series)) {
+      datasets.push({
+        label: (code === 'wuzhong' ? '吴中·' : '奉贤·') + s.name,
+        data: (s.points || []).map(p => ({ x: p.date, y: p.avg_unit_price })),
+        borderColor: colors[code] || '#f5a524',
+        tension: 0.25,
+        pointRadius: 0,
+      });
+    }
+    // 统一标签：取最长序列的日期
+    let labels = [];
+    for (const s of Object.values(series)) {
+      const ds = (s.points || []).map(p => p.date);
+      if (ds.length > labels.length) labels = ds;
+    }
+    const chartDatasets = [];
+    for (const [code, s] of Object.entries(series)) {
+      const map = {};
+      (s.points || []).forEach(p => { map[p.date] = p.avg_unit_price; });
+      chartDatasets.push({
+        label: (code === 'wuzhong' ? '吴中·' : '奉贤·') + s.name,
+        data: labels.map(d => map[d] ?? null),
+        borderColor: colors[code] || '#f5a524',
+        spanGaps: true,
+        tension: 0.25,
+        pointRadius: 0,
+      });
+    }
+    new Chart(document.getElementById('trendChart'), {
+      type: 'line',
+      data: { labels, datasets: chartDatasets },
+      options: {
+        responsive: true,
+        plugins: { legend: { labels: { color: '#e7ecf3' } } },
+        scales: {
+          x: { ticks: { color: '#8b9bb4', maxTicksLimit: 8 }, grid: { color: '#243044' } },
+          y: { ticks: { color: '#8b9bb4' }, grid: { color: '#243044' }, title: { display: true, text: '元/㎡', color: '#8b9bb4' } }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

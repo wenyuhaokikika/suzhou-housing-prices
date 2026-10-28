@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}总览 · 苏州各区房价{% endblock %}
+{% block content %}
+<div class="crumb">首页 / 总览</div>
+<h1>苏州市辖区房价看板</h1>
+<p class="sub">主指标为<strong>成交单价</strong>（挂牌仅参考）· 示意数据 · 表头可筛选</p>
+
+<div class="grid">
+  <div class="card"><div class="label">小区/楼盘</div><div class="value">{{ overview.communities }}</div></div>
+  <div class="card"><div class="label">成交/备案笔数</div><div class="value">{{ overview.transactions }}</div></div>
+  <div class="card"><div class="label">挂牌套数（参考）</div><div class="value">{{ overview.listings }}</div></div>
+  <div class="card"><div class="label">二手挂牌</div><div class="value">{{ overview.ershou_listings }}</div></div>
+  <div class="card"><div class="label">新房挂牌</div><div class="value">{{ overview.xinfang_listings }}</div></div>
+  <div class="card"><div class="label">关注中</div><div class="value">{{ overview.watchlist }}</div></div>
+</div>
+
+<p class="sub">{{ compare.summary_zh|safe }}</p>
+
+<div class="section region-grid">
+  {% for r in compare.regions %}
+  <a class="card clickable" href="/regions/{{ r.code }}">
+    <h2>{{ r.district }} →</h2>
+    <div class="stat-row">
+      <div><strong>{{ '%.0f'|format(r.avg_deal_ershou) if r.avg_deal_ershou else '-' }}</strong><span>二手成交 元/㎡</span></div>
+      <div><strong>{{ '%.0f'|format(r.avg_deal_xinfang) if r.avg_deal_xinfang else '-' }}</strong><span>新房成交 元/㎡</span></div>
+      <div><strong>{% if r.premium_ershou_pct is not none %}+{{ r.premium_ershou_pct }}%{% else %}—{% endif %}</strong><span>挂牌相对成交溢价</span></div>
+      <div><strong>{{ r.transactions }}</strong><span>成交笔数</span></div>
+    </div>
+    <p class="note" style="margin-top:8px;">挂牌参考：二手 {{ '%.0f'|format(r.avg_listing_ershou) if r.avg_listing_ershou else '-' }} · 新房 {{ '%.0f'|format(r.avg_listing_xinfang) if r.avg_listing_xinfang else '-' }}</p>
+  </a>
+  {% endfor %}
+</div>
+
+<div class="section card">
+  <h2>全市成交均价较高小区（主排序：成交）</h2>
+  <table class="filterable">
+    <thead>
+      <tr class="labels">
+        <th data-type="text">小区/楼盘</th>
+        <th data-type="select">区</th>
+        <th data-type="select">片区</th>
+        <th data-type="select">类型</th>
+        <th data-type="number">建成</th>
+        <th data-type="number">成交均价</th>
+        <th data-type="number">挂牌均价</th>
+        <th data-type="number">挂牌溢价%</th>
+        <th data-type="none"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in tops %}
+      <tr>
+        <td data-v="{{ c.name }}"><a href="/communities/{{ c.id }}">{{ c.name }}</a></td>
+        <td data-v="{{ c.district }}">{{ c.district }}</td>
+        <td data-v="{{ c.area_name or '' }}">{{ c.area_name or '-' }}</td>
+        <td data-v="{{ c.market_label }}"><span class="badge {{ c.market_type }}">{{ c.market_label }}</span></td>
+        <td data-v="{{ c.build_year or '' }}">{{ c.build_year or '-' }}</td>
+        <td data-v="{{ c.avg_deal_price or '' }}"><strong>{{ '%.0f'|format(c.avg_deal_price) }}</strong></td>
+        <td data-v="{{ c.avg_listing_price or '' }}">{% if c.avg_listing_price %}{{ '%.0f'|format(c.avg_listing_price) }}{% else %}—{% endif %}</td>
+        <td data-v="{{ c.listing_premium_pct or '' }}">{% if c.listing_premium_pct is not none %}+{{ c.listing_premium_pct }}%{% else %}—{% endif %}</td>
+        <td><a href="/communities/{{ c.id }}">详情</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

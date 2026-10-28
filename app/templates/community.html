@@ -1,0 +1,218 @@
+{% from "macros_source.html" import source_cell %}
+{% extends "base.html" %}
+{% block title %}{{ community.name }} · 详情{% endblock %}
+{% block content %}
+<div class="crumb">
+  <a href="/">总览</a> /
+  <a href="/regions/{{ region.code }}">{{ region.city }}{{ region.district }}</a> /
+  {{ community.name }}
+</div>
+
+<div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start;">
+  <div>
+    <h1>{{ community.name }}
+      <span class="badge {{ community.market_type }}">{{ market_label }}</span>
+    </h1>
+    <p class="sub" style="margin-bottom:6px;">
+      {{ region.city }}{{ region.district }}
+      {% if community.area_name %} · {{ community.area_name }}片区{% endif %}
+      {% if community.address %} · {{ community.address }}{% endif %}
+    </p>
+    <p class="muted" style="margin:0;">
+      物业：{{ community.property_type or '住宅' }}
+      · 建成/开盘：{{ community.build_year or '—' }}
+      {% if community.developer %} · 开发商：{{ community.developer }}{% endif %}
+      · 数据源：{{ community.source or '—' }}
+    </p>
+  </div>
+  <div>
+    {% if watched %}
+      <form method="post" action="/ui/watchlist/remove/{{ community.id }}" style="display:inline;">
+        <button class="btn" type="submit">取消关注</button>
+      </form>
+    {% else %}
+      <form method="post" action="/ui/watchlist/add/{{ community.id }}" style="display:inline;">
+        <button class="btn primary" type="submit">＋ 加入关注</button>
+      </form>
+    {% endif %}
+    <a class="btn" href="/regions/{{ region.code }}">返回区域列表</a>
+  </div>
+</div>
+
+
+<div class="provenance">
+  <strong>数据出处：</strong>
+  {% if community.source == 'demo' %}
+  本页小区与挂牌/成交主要为<strong>本地示意数据</strong>（source=demo），
+  <strong>非</strong>链家/贝壳/安居客实爬结果。
+  因站点反爬未能拉取实盘，价格按公开市场常见区间合成；小区名为苏州实有可识别名称。
+  详见 <a href="/about-data">数据说明</a>。
+  {% else %}
+  本页 source=<code>{{ community.source }}</code>
+  {% if community.source_url and (community.source_url.startswith('http://') or community.source_url.startswith('https://')) %}
+  · <a href="{{ community.source_url }}" target="_blank" rel="noopener">原始页面</a>
+  {% endif %}
+  · 部分行仍可能混有示意数据，以来源列徽章为准。
+  {% endif %}
+</div>
+
+<div class="grid" style="margin-top:18px;">
+  <div class="card"><div class="label">成交均价（主）</div><div class="value">{% if stats.deal_unit_price_avg %}{{ '%.0f'|format(stats.deal_unit_price_avg) }}{% else %}-{% endif %}</div><div class="muted">元/㎡</div></div>
+  <div class="card"><div class="label">成交单价区间</div><div class="value" style="font-size:1.1rem;">{% if stats.deal_unit_price_min %}{{ '%.0f'|format(stats.deal_unit_price_min) }}–{{ '%.0f'|format(stats.deal_unit_price_max) }}{% else %}-{% endif %}</div><div class="muted">元/㎡</div></div>
+  <div class="card"><div class="label">挂牌均价（参考）</div><div class="value">{% if stats.listing_unit_price_avg %}{{ '%.0f'|format(stats.listing_unit_price_avg) }}{% else %}-{% endif %}</div><div class="muted">元/㎡</div></div>
+  <div class="card"><div class="label">挂牌相对成交溢价</div><div class="value" style="font-size:1.2rem;">{% if stats.listing_premium_pct is not none %}+{{ stats.listing_premium_pct }}%{% else %}—{% endif %}</div><div class="muted">正数=挂牌更高</div></div>
+  <div class="card"><div class="label">同比 / 环比（成交）</div><div class="value" style="font-size:1.1rem;">{% if stats.changes.yoy_pct is not none %}{{ stats.changes.yoy_pct }}%{% else %}—{% endif %} / {% if stats.changes.mom_pct is not none %}{{ stats.changes.mom_pct }}%{% else %}—{% endif %}</div></div>
+  <div class="card"><div class="label">成交笔数 / 在售</div><div class="value" style="font-size:1.2rem;">{{ stats.txn_count }} / {{ stats.listing_count }}</div></div>
+</div>
+
+<div class="section card">
+  <h2>成交均价走势（近3年 · 主图）</h2>
+  <canvas id="priceChart"></canvas>
+  <p class="note">按月成交/备案均价；示意数据。挂牌价不在此图。</p>
+</div>
+
+<div class="section two-col">
+  <div class="card">
+    <h2>户型分布（成交样本优先）</h2>
+    {% if stats.rooms_dist %}
+    <table>
+      <thead><tr><th>户型</th><th>套数</th></tr></thead>
+      <tbody>
+        {% for r in stats.rooms_dist %}
+        <tr><td>{{ r.rooms }}</td><td>{{ r.count }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="muted">暂无户型样本</p>
+    {% endif %}
+  </div>
+  <div class="card">
+    <h2>基本信息</h2>
+    <table>
+      <tr><th>名称</th><td>{{ community.name }}</td></tr>
+      <tr><th>市场类型</th><td>{{ market_label }}</td></tr>
+      <tr><th>片区</th><td>{{ community.area_name or '—' }}</td></tr>
+      <tr><th>地址</th><td>{{ community.address or '—' }}</td></tr>
+      <tr><th>物业类型</th><td>{{ community.property_type or '—' }}</td></tr>
+      <tr><th>建成年代</th><td>{{ community.build_year or '—' }}</td></tr>
+      <tr><th>开发商</th><td>{{ community.developer or '—' }}</td></tr>
+      <tr><th>平均面积</th><td>{% if stats.area_avg %}{{ stats.area_avg }} ㎡{% else %}—{% endif %}</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="section card">
+  <h2>{% if community.market_type == 'xinfang' %}成交/备案记录（主）{% else %}成交记录（主）{% endif %}</h2>
+  <table class="filterable">
+    <thead>
+      <tr class="labels">
+        <th data-type="text">日期</th>
+        <th data-type="number">总价(万)</th>
+        <th data-type="number">单价</th>
+        <th data-type="number">面积</th>
+        <th data-type="select">户型</th>
+        <th data-type="select">楼层</th>
+        <th data-type="select">来源</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for t in transactions %}
+      <tr>
+        <td data-v="{{ t.deal_date or '' }}">{{ t.deal_date or '—' }}</td>
+        <td data-v="{{ t.price or '' }}">{{ t.price or '—' }}</td>
+        <td data-v="{{ t.unit_price or '' }}">{% if t.unit_price %}{{ '%.0f'|format(t.unit_price) }}{% else %}—{% endif %}</td>
+        <td data-v="{{ t.area or '' }}">{{ t.area or '—' }}</td>
+        <td data-v="{{ t.rooms or '' }}">{{ t.rooms or '—' }}</td>
+        <td data-v="{{ t.floor or '' }}">{{ t.floor or '—' }}</td>
+        <td data-v="{{ t.source }}">{{ source_cell(t.source, t.source_url) }}</td>
+      </tr>
+      {% else %}
+      <tr class="empty-row"><td colspan="7" class="muted">暂无成交</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="section card">
+  <h2>{% if community.market_type == 'xinfang' %}在售报价（参考）{% else %}在售挂牌（参考）{% endif %}</h2>
+  <form method="get" action="/communities/{{ community.id }}" style="margin-bottom:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;">
+    <input type="hidden" name="tab" value="listings">
+    <label>户型 <input class="tf-input" name="rooms" value="{{ lfilters.rooms or '' }}" placeholder="如 3室"></label>
+    <label>总价≥ <input class="tf-input tf-num" type="number" name="price_min" value="{{ lfilters.price_min or '' }}"></label>
+    <label>总价≤ <input class="tf-input tf-num" type="number" name="price_max" value="{{ lfilters.price_max or '' }}"></label>
+    <label>单价≥ <input class="tf-input tf-num" type="number" name="unit_min" value="{{ lfilters.unit_min or '' }}"></label>
+    <label>单价≤ <input class="tf-input tf-num" type="number" name="unit_max" value="{{ lfilters.unit_max or '' }}"></label>
+    <label>面积≥ <input class="tf-input tf-num" type="number" name="area_min" value="{{ lfilters.area_min or '' }}"></label>
+    <label>面积≤ <input class="tf-input tf-num" type="number" name="area_max" value="{{ lfilters.area_max or '' }}"></label>
+    <button class="btn primary" type="submit">筛选挂牌</button>
+    <a class="btn" href="/communities/{{ community.id }}">清空</a>
+  </form>
+  <table class="filterable">
+    <thead>
+      <tr class="labels">
+        <th data-type="text">标题</th>
+        <th data-type="number">总价(万)</th>
+        <th data-type="number">单价</th>
+        <th data-type="number">面积</th>
+        <th data-type="select">户型</th>
+        <th data-type="select">楼层</th>
+        <th data-type="select">朝向</th>
+        <th data-type="select">装修</th>
+        <th data-type="number">年代</th>
+        <th data-type="select">来源</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for l in listings %}
+      <tr>
+        <td data-v="{{ l.title or '' }}">{{ l.title or '—' }}</td>
+        <td data-v="{{ l.price or '' }}">{{ l.price or '—' }}</td>
+        <td data-v="{{ l.unit_price or '' }}">{% if l.unit_price %}{{ '%.0f'|format(l.unit_price) }}{% else %}—{% endif %}</td>
+        <td data-v="{{ l.area or '' }}">{% if l.area %}{{ l.area }}{% else %}—{% endif %}</td>
+        <td data-v="{{ l.rooms or '' }}">{{ l.rooms or '—' }}</td>
+        <td data-v="{{ l.floor or '' }}">{{ l.floor or '—' }}</td>
+        <td data-v="{{ l.orientation or '' }}">{{ l.orientation or '—' }}</td>
+        <td data-v="{{ l.decoration or '' }}">{{ l.decoration or '—' }}</td>
+        <td data-v="{{ l.build_year or '' }}">{{ l.build_year or '—' }}</td>
+        <td data-v="{{ l.source }}">{{ source_cell(l.source, l.source_url) }}</td>
+      </tr>
+      {% else %}
+      <tr class="empty-row"><td colspan="10" class="muted">暂无挂牌</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const points = {{ series | tojson }};
+  const labels = points.map(p => p.date);
+  const data = points.map(p => p.avg_unit_price);
+  const color = {{ '"#a78bfa"' if community.market_type == 'xinfang' else '"#38bdf8"' }};
+  new Chart(document.getElementById('priceChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: '成交均价 元/㎡',
+        data,
+        borderColor: color,
+        tension: 0.25,
+        pointRadius: 0,
+        fill: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { labels: { color: '#e7ecf3' } } },
+      scales: {
+        x: { ticks: { color: '#8b9bb4', maxTicksLimit: 10 }, grid: { color: '#243044' } },
+        y: { ticks: { color: '#8b9bb4' }, grid: { color: '#243044' }, title: { display: true, text: '元/㎡', color: '#8b9bb4' } }
+      }
+    }
+  });
+</script>
+{% endblock %}

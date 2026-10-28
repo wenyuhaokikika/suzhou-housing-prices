@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}{{ region.city }}{{ region.district }} · 房价{% endblock %}
+{% block content %}
+<div class="crumb">
+  <a href="/">总览</a> / {{ region.city }}{{ region.district }}
+</div>
+<h1>{{ region.city }}{{ region.district }}</h1>
+<p class="sub">二手<strong>成交</strong>均价 <strong>{{ '%.0f'|format(stats.avg_deal_ershou) if stats.avg_deal_ershou else '-' }}</strong> 元/㎡ ·
+  新房<strong>成交</strong>均价 <strong>{{ '%.0f'|format(stats.avg_deal_xinfang) if stats.avg_deal_xinfang else '-' }}</strong> 元/㎡ ·
+  挂牌溢价约 {% if stats.premium_ershou_pct is not none %}+{{ stats.premium_ershou_pct }}%{% else %}—{% endif %}（二手）·
+  共 {{ community_rows|length }} 个小区</p>
+<p class="note">挂牌参考：二手 {{ '%.0f'|format(stats.avg_listing_ershou) if stats.avg_listing_ershou else '-' }} · 新房 {{ '%.0f'|format(stats.avg_listing_xinfang) if stats.avg_listing_xinfang else '-' }} 元/㎡</p>
+
+<form class="card section" method="get" action="/regions/{{ region.code }}" style="margin-bottom:16px;">
+  <h2>服务端筛选（提交后刷新）</h2>
+  <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">
+    <label>名称 <input class="tf-input" type="search" name="q" value="{{ filters.q or '' }}" placeholder="包含"></label>
+    <label>片区 <input class="tf-input" type="search" name="area" value="{{ filters.area or '' }}" placeholder="包含"></label>
+    <label>类型
+      <select class="tf-select" name="market">
+        <option value="">全部</option>
+        <option value="ershou" {% if filters.market=='ershou' %}selected{% endif %}>二手房</option>
+        <option value="xinfang" {% if filters.market=='xinfang' %}selected{% endif %}>新房</option>
+      </select>
+    </label>
+    <label>物业 <input class="tf-input" type="search" name="property" value="{{ filters.property or '' }}"></label>
+    <label>开发商 <input class="tf-input" type="search" name="developer" value="{{ filters.developer or '' }}"></label>
+    <label>建成≥ <input class="tf-input tf-num" type="number" name="year_min" value="{{ filters.year_min or '' }}"></label>
+    <label>建成≤ <input class="tf-input tf-num" type="number" name="year_max" value="{{ filters.year_max or '' }}"></label>
+    <label>成交均价≥ <input class="tf-input tf-num" type="number" name="price_min" value="{{ filters.price_min or '' }}"></label>
+    <label>成交均价≤ <input class="tf-input tf-num" type="number" name="price_max" value="{{ filters.price_max or '' }}"></label>
+    <button class="btn primary" type="submit">应用</button>
+    <a class="btn" href="/regions/{{ region.code }}">清空</a>
+  </div>
+</form>
+
+<div class="tabs">
+  <a href="/regions/{{ region.code }}" class="{% if not filters.market %}active{% endif %}">全部</a>
+  <a href="/regions/{{ region.code }}?market=ershou" class="{% if filters.market=='ershou' %}active{% endif %}">二手房</a>
+  <a href="/regions/{{ region.code }}?market=xinfang" class="{% if filters.market=='xinfang' %}active{% endif %}">新房</a>
+</div>
+
+<div class="section card">
+  <h2>小区列表</h2>
+  <table class="filterable">
+    <thead>
+      <tr class="labels">
+        <th data-type="text">名称</th>
+        <th data-type="select">片区</th>
+        <th data-type="select">类型</th>
+        <th data-type="select">物业</th>
+        <th data-type="number">建成/开盘</th>
+        <th data-type="text">开发商</th>
+        <th data-type="number">成交均价</th>
+        <th data-type="number">挂牌均价</th>
+        <th data-type="number">溢价%</th>
+        <th data-type="number">成交笔数</th>
+        <th data-type="number">在售</th>
+        <th data-type="none"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in community_rows %}
+      <tr>
+        <td data-v="{{ row.name }}"><a href="/communities/{{ row.id }}"><strong>{{ row.name }}</strong></a></td>
+        <td data-v="{{ row.area_name or '' }}">{{ row.area_name or '-' }}</td>
+        <td data-v="{{ row.market_label }}"><span class="badge {{ row.market_type }}">{{ row.market_label }}</span></td>
+        <td data-v="{{ row.property_type or '' }}">{{ row.property_type or '-' }}</td>
+        <td data-v="{{ row.build_year or '' }}">{{ row.build_year or '-' }}</td>
+        <td data-v="{{ row.developer or '' }}">{{ row.developer or '-' }}</td>
+        <td data-v="{{ row.avg_deal_price or '' }}">{% if row.avg_deal_price %}<strong>{{ '%.0f'|format(row.avg_deal_price) }}</strong>{% else %}-{% endif %}</td>
+        <td data-v="{{ row.avg_listing_price or '' }}">{% if row.avg_listing_price %}{{ '%.0f'|format(row.avg_listing_price) }}{% else %}—{% endif %}</td>
+        <td data-v="{{ row.listing_premium_pct or '' }}">{% if row.listing_premium_pct is not none %}+{{ row.listing_premium_pct }}%{% else %}—{% endif %}</td>
+        <td data-v="{{ row.txn_count }}">{{ row.txn_count }}</td>
+        <td data-v="{{ row.listing_count }}">{{ row.listing_count }}</td>
+        <td><a href="/communities/{{ row.id }}">查看详情 →</a></td>
+      </tr>
+      {% else %}
+      <tr class="empty-row"><td colspan="10" class="muted">暂无匹配小区</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

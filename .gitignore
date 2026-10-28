@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+*.egg-info/
+dist/
+build/
+.env
+data/*.db-journal
+# 本地 SQLite 过大时可取消下一行注释，改用: python -m scrapers.run --region all --demo-only
+# data/housing.db

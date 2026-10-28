@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}全部小区 · 苏州{% endblock %}
+{% block content %}
+<div class="crumb"><a href="/">总览</a> / 全部小区</div>
+<h1>全部小区 / 楼盘</h1>
+<p class="sub">苏州市辖区 · 表头即时筛选 + 下方服务端条件</p>
+<div class="tabs">
+  <a href="/communities" class="{% if not market and not region %}active{% endif %}">全部</a>
+  <a href="/communities?market=ershou" class="{% if market=='ershou' and not region %}active{% endif %}">二手</a>
+  <a href="/communities?market=xinfang" class="{% if market=='xinfang' and not region %}active{% endif %}">新房</a>
+  <a href="/communities?region=gusu" class="{% if region=='gusu' %}active{% endif %}">姑苏</a>
+  <a href="/communities?region=huqiu" class="{% if region=='huqiu' %}active{% endif %}">虎丘</a>
+  <a href="/communities?region=wuzhong" class="{% if region=='wuzhong' %}active{% endif %}">吴中</a>
+  <a href="/communities?region=xiangcheng" class="{% if region=='xiangcheng' %}active{% endif %}">相城</a>
+  <a href="/communities?region=wujiang" class="{% if region=='wujiang' %}active{% endif %}">吴江</a>
+  <a href="/communities?region=sip" class="{% if region=='sip' %}active{% endif %}">园区</a>
+</div>
+
+<form class="card section" method="get" action="/communities">
+  <h2>服务端筛选</h2>
+  <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">
+    <input type="hidden" name="region" value="{{ region or '' }}">
+    <label>名称 <input class="tf-input" name="q" value="{{ q or '' }}" placeholder="包含"></label>
+    <label>片区 <input class="tf-input" name="area" value="{{ area or '' }}"></label>
+    <label>类型
+      <select class="tf-select" name="market">
+        <option value="">全部</option>
+        <option value="ershou" {% if market=='ershou' %}selected{% endif %}>二手</option>
+        <option value="xinfang" {% if market=='xinfang' %}selected{% endif %}>新房</option>
+      </select>
+    </label>
+    <label>建成≥ <input class="tf-input tf-num" type="number" name="year_min" value="{{ year_min or '' }}"></label>
+    <label>建成≤ <input class="tf-input tf-num" type="number" name="year_max" value="{{ year_max or '' }}"></label>
+    <label>成交均价≥ <input class="tf-input tf-num" type="number" name="price_min" value="{{ price_min or '' }}"></label>
+    <label>成交均价≤ <input class="tf-input tf-num" type="number" name="price_max" value="{{ price_max or '' }}"></label>
+    <button class="btn primary" type="submit">应用</button>
+  </div>
+</form>
+
+<div class="card">
+  <h2>小区列表</h2>
+  <table class="filterable">
+    <thead>
+      <tr class="labels">
+        <th data-type="text">名称</th>
+        <th data-type="select">区</th>
+        <th data-type="select">片区</th>
+        <th data-type="select">类型</th>
+        <th data-type="number">建成</th>
+        <th data-type="number">成交均价</th>
+        <th data-type="none"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td data-v="{{ row.name }}"><a href="/communities/{{ row.id }}"><strong>{{ row.name }}</strong></a></td>
+        <td data-v="{{ row.district }}">{{ row.district }}</td>
+        <td data-v="{{ row.area_name or '' }}">{{ row.area_name or '-' }}</td>
+        <td data-v="{{ row.market_label }}"><span class="badge {{ row.market_type }}">{{ row.market_label }}</span></td>
+        <td data-v="{{ row.build_year or '' }}">{{ row.build_year or '-' }}</td>
+        <td data-v="{{ row.avg_unit_price or '' }}">{% if row.avg_unit_price %}{{ '%.0f'|format(row.avg_unit_price) }}{% else %}-{% endif %}</td>
+        <td><a href="/communities/{{ row.id }}">详情</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

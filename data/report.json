@@ -1,0 +1,502 @@
+{
+  "generated_at": "2026-10-28",
+  "overview": {
+    "communities": 171,
+    "listings": 1824,
+    "transactions": 19531,
+    "snapshots": 6327,
+    "ershou_listings": 1448,
+    "xinfang_listings": 376
+  },
+  "compare": {
+    "regions": [
+      {
+        "code": "gusu",
+        "city": "苏州",
+        "district": "姑苏",
+        "avg_ershou": 31954.6,
+        "avg_xinfang": 44736.2,
+        "avg_unit_price": 31954.6,
+        "listings": 300,
+        "transactions": 3235,
+        "communities": 28,
+        "ershou_communities": 20,
+        "xinfang_communities": 8
+      },
+      {
+        "code": "huqiu",
+        "city": "苏州",
+        "district": "虎丘",
+        "avg_ershou": 25865.4,
+        "avg_xinfang": 29504.5,
+        "avg_unit_price": 25865.4,
+        "listings": 292,
+        "transactions": 3152,
+        "communities": 28,
+        "ershou_communities": 20,
+        "xinfang_communities": 8
+      },
+      {
+        "code": "wuzhong",
+        "city": "苏州",
+        "district": "吴中",
+        "avg_ershou": 23240.1,
+        "avg_xinfang": 28242.6,
+        "avg_unit_price": 23240.1,
+        "listings": 312,
+        "transactions": 3184,
+        "communities": 28,
+        "ershou_communities": 20,
+        "xinfang_communities": 8
+      },
+      {
+        "code": "xiangcheng",
+        "city": "苏州",
+        "district": "相城",
+        "avg_ershou": 24755.6,
+        "avg_xinfang": 22325.8,
+        "avg_unit_price": 24755.6,
+        "listings": 303,
+        "transactions": 3199,
+        "communities": 28,
+        "ershou_communities": 20,
+        "xinfang_communities": 8
+      },
+      {
+        "code": "wujiang",
+        "city": "苏州",
+        "district": "吴江",
+        "avg_ershou": 18977.0,
+        "avg_xinfang": 22661.0,
+        "avg_unit_price": 18977.0,
+        "listings": 295,
+        "transactions": 3179,
+        "communities": 28,
+        "ershou_communities": 20,
+        "xinfang_communities": 8
+      },
+      {
+        "code": "sip",
+        "city": "苏州",
+        "district": "工业园区",
+        "avg_ershou": 41265.4,
+        "avg_xinfang": 43915.9,
+        "avg_unit_price": 41265.4,
+        "listings": 322,
+        "transactions": 3582,
+        "communities": 31,
+        "ershou_communities": 23,
+        "xinfang_communities": 8
+      }
+    ],
+    "city": "苏州",
+    "excluded": [
+      "张家港",
+      "常熟",
+      "太仓",
+      "昆山"
+    ],
+    "summary_zh": "覆盖苏州 6 个市辖区（已排除张家港/常熟/太仓/昆山）。；二手均价最高 工业园区约 41265 元/㎡，最低 吴江约 18977 元/㎡；新房均价最高 姑苏约 44736 元/㎡，最低 相城约 22326 元/㎡。",
+    "diff_pct_ershou": null,
+    "diff_pct_xinfang": null
+  },
+  "tops": [
+    {
+      "region": "gusu",
+      "district": "姑苏",
+      "top_communities": [
+        {
+          "id": 6,
+          "name": "上林苑别墅",
+          "area_name": "平江",
+          "market_type": "ershou",
+          "market_label": "二手房",
+          "build_year": 2005,
+          "property_type": "别墅",
+          "avg_unit_price": 113871.0,
+          "region_code": "gusu",
+          "district": "姑苏"
+        },
+        {
+          "id": 1,
+          "name": "拙政别墅",
+          "area_name": "平江",
+          "market_type": "ershou",
+          "market_label": "二手房",
+          "build_year": 2008,
+          "property_type": "别墅",
+          "avg_unit_price": 79885.0,
+          "region_code": "gusu",
+          "district": "姑苏"
+        },
+        {
+          "id": 23,
+          "name": "融创桃花源姑苏",
+          "area_name": "平江",
+          "market_type": "xinfang",
+          "market_label": "新房",
+          "build_year": 2023,
+          "property_type": "住宅",
+          "avg_unit_price": 47066.0,
+          "region_code": "gusu",
+          "district": "姑苏"
+        },
+        {
+          "id": 25,
+          "name": "华润置地姑苏府",
+          "area_name": "金阊",
+          "market_type": "xinfang",
+          "market_label": "新房",
+          "build_year": 2025,
+          "property_type": "住宅",
+          "avg_unit_price": 45157.0,
+          "region_code": "gusu",
+          "district": "姑苏"
+        },
+        {
+          "id": 22,
+          "name": "中海姑苏里",
+          "area_name": "金阊",
+          "market_type": "xinfang",
+          "market_label": "新房",
+          "build_year": 2024,
+          "property_type": "住宅",
+          "avg_unit_price": 44500.0,
+          "region_code": "gusu",
+          "district": "姑苏"
+        }
+      ]
+    },
+    {
+      "region": "huqiu",
+      "district": "虎丘",
+      "top_communities": [
+        {
+          "id": 48,
+          "name": "绿城苏州桃花源",
+          "area_name": "科技城",
+          "market_type": "ershou",
+          "market_label": "二手房",
+          "build_year": 2012,
+          "property_type": "别墅",
+          "avg_unit_price": 38192.0,
+          "region_code": "huqiu",
+          "district": "虎丘"
+        },
+        {
+          "id": 49,
+          "name": "狮山金茂府",
+          "area_name": "狮山",
+          "market_type": "xinfang",
+          "market_label": "新房",
+          "build_year": 2022,
+          "property_type": "住宅",
+          "avg_unit_price": 37532.0,
+          "region_code": "huqiu",
+          "district": "虎丘"
+        },
+        {
+          "id": 52,
+          "name": "建发檀府高新",
+          "area_name": "狮山",
+          "market_type": "xinfang",
+          "market_label": "新房",
+          "build_year": 2024,
+          "property_type": "住宅",
+          "avg_unit_price": 34168.0,
+          "region_code": "huqiu",
+          "district": "虎丘"
+        },
+        {
+          "id": 43,
+          "name": "融创江南桃花源",
+          "area_name": "科技城",
+          "market_type": "ershou",
+          "market_label": "二手房",
+          "build_year": 2019,
+          "property_type": "别墅/住宅",
+          "avg_unit_price": 33028.0,
+          "region_code": "huqiu",
+          "district": "虎丘"
+        },
+        {
+          "id": 56,
+          "name": "绿城晓风印月",
+          "area_name": "狮山",
+          "market_type": "xinfang",
+          "market_label": "新房",
+          "build_year": 2025,
+          "property_type": "住宅",
+          "avg_unit_price": 30819.0,
+          "region_code": "huqiu",
+          "district": "虎丘"
+        }
+      ]
+    },
+    {
+      "region": "wuzhong",
+      "district": "吴中",
+      "top_communities": [
+        {
+          "id": 64,
+          "name": "现代园墅",
+          "area_name": "独墅湖",
+          "market_type": "ershou",
+          "market_label": "二手房",
+          "build_year": 2011,
+          "property_type": "别墅/洋房",
+          "avg_unit_price": 34907.0,
+          "region_code": "wuzhong",
+          "district": "吴中"
+        },
+        {
+          "id": 77,
+          "name": "龙湖御湖境",
+          "area_name": "城南",
+          "market_type": "xinfang",
+          "market_label": "新房",
+          "build_year": 2024,
+          "property_type": "住宅",
+          "avg_unit_price": 30326.0,
+          "region_code": "wuzhong",
+          "district": "吴中"
+        },
+        {
+          "id": 80,
+          "name": "美的南山云悦天境",
+          "area_name": "胥口",
+          "market_type": "xinfang",
+          "market_label": "新房",
+          "build_year": 2024,
+          "property_type": "住宅",
+          "avg_unit_price": 27875.0,
+          "region_code": "wuzhong",
+          "district": "吴中"
+        },
+        {
+          "id": 78,
+          "name": "鲁能公馆",
+          "area_name": "蠡墅",
+          "market_type": "xinfang",
+          "market_label": "新房",
+          "build_year": 2023,
+          "property_type": "住宅",
+          "avg_unit_price": 27374.0,
+          "region_code": "wuzhong",
+          "district": "吴中"
+        },
+        {
+          "id": 79,
+          "name": "星河时代新著",
+          "area_name": "木渎",
+          "market_type": "xinfang",
+          "market_label": "新房",
+          "build_year": 2024,
+          "property_type": "住宅",
+          "avg_unit_price": 26978.0,
+          "region_code": "wuzhong",
+          "district": "吴中"
+        }
+      ]
+    },
+    {
+      "region": "xiangcheng",
+      "district": "相城",
+      "top_communities": [
+        {
+          "id": 86,
+          "name": "绿地海域乾唐墅",
+          "area_name": "阳澄湖",
+          "market_type": "ershou",
+          "market_label": "二手房",
+          "build_year": 2015,
+          "property_type": "别墅",
+          "avg_unit_price": 49951.0,
+          "region_code": "xiangcheng",
+          "district": "相城"
+        },
+        {
+          "id": 103,
+          "name": "绿城桃花源相城",
+          "area_name": "阳澄湖",
+          "market_type": "ershou",
+          "market_label": "二手房",
+          "build_year": 2014,
+          "property_type": "别墅",
+          "avg_unit_price": 42480.0,
+          "region_code": "xiangcheng",
+          "district": "相城"
+        },
+        {
+          "id": 100,
+          "name": "融创御园",
+          "area_name": "阳澄湖",
+          "market_type": "ershou",
+          "market_label": "二手房",
+          "build_year": 2017,
+          "property_type": "住宅",
+          "avg_unit_price": 30580.0,
+          "region_code": "xiangcheng",
+          "district": "相城"
+        },
+        {
+          "id": 107,
+          "name": "建发观云",
+          "area_name": "阳澄湖",
+          "market_type": "xinfang",
+          "market_label": "新房",
+          "build_year": 2025,
+          "property_type": "住宅",
+          "avg_unit_price": 27381.0,
+          "region_code": "xiangcheng",
+          "district": "相城"
+        },
+        {
+          "id": 94,
+          "name": "南山檀郡",
+          "area_name": "阳澄湖",
+          "market_type": "ershou",
+          "market_label": "二手房",
+          "build_year": 2019,
+          "property_type": "住宅",
+          "avg_unit_price": 24779.0,
+          "region_code": "xiangcheng",
+          "district": "相城"
+        }
+      ]
+    },
+    {
+      "region": "wujiang",
+      "district": "吴江",
+      "top_communities": [
+        {
+          "id": 118,
+          "name": "绿城桃花源吴江",
+          "area_name": "太湖新城",
+          "market_type": "ershou",
+          "market_label": "二手房",
+          "build_year": 2016,
+          "property_type": "别墅/住宅",
+          "avg_unit_price": 26450.0,
+          "region_code": "wujiang",
+          "district": "吴江"
+        },
+        {
+          "id": 139,
+          "name": "融创江南壹号院",
+          "area_name": "太湖新城",
+          "market_type": "xinfang",
+          "market_label": "新房",
+          "build_year": 2024,
+          "property_type": "住宅",
+          "avg_unit_price": 26405.0,
+          "region_code": "wujiang",
+          "district": "吴江"
+        },
+        {
+          "id": 136,
+          "name": "中海苏澜湾",
+          "area_name": "太湖新城",
+          "market_type": "xinfang",
+          "market_label": "新房",
+          "build_year": 2024,
+          "property_type": "住宅",
+          "avg_unit_price": 24672.0,
+          "region_code": "wujiang",
+          "district": "吴江"
+        },
+        {
+          "id": 133,
+          "name": "绿城月映江南",
+          "area_name": "太湖新城",
+          "market_type": "xinfang",
+          "market_label": "新房",
+          "build_year": 2024,
+          "property_type": "住宅",
+          "avg_unit_price": 23284.0,
+          "region_code": "wujiang",
+          "district": "吴江"
+        },
+        {
+          "id": 135,
+          "name": "华润万象华府吴江",
+          "area_name": "松陵",
+          "market_type": "xinfang",
+          "market_label": "新房",
+          "build_year": 2025,
+          "property_type": "住宅",
+          "avg_unit_price": 22415.0,
+          "region_code": "wujiang",
+          "district": "吴江"
+        }
+      ]
+    },
+    {
+      "region": "sip",
+      "district": "工业园区",
+      "top_communities": [
+        {
+          "id": 144,
+          "name": "融创苏州桃花源",
+          "area_name": "湖西",
+          "market_type": "ershou",
+          "market_label": "二手房",
+          "build_year": 2013,
+          "property_type": "别墅",
+          "avg_unit_price": 81477.0,
+          "region_code": "sip",
+          "district": "工业园区"
+        },
+        {
+          "id": 154,
+          "name": "绿城玫瑰园",
+          "area_name": "双湖",
+          "market_type": "ershou",
+          "market_label": "二手房",
+          "build_year": 2020,
+          "property_type": "住宅",
+          "avg_unit_price": 50932.0,
+          "region_code": "sip",
+          "district": "工业园区"
+        },
+        {
+          "id": 165,
+          "name": "绿城玫瑰园二期",
+          "area_name": "双湖",
+          "market_type": "xinfang",
+          "market_label": "新房",
+          "build_year": 2024,
+          "property_type": "住宅",
+          "avg_unit_price": 49902.0,
+          "region_code": "sip",
+          "district": "工业园区"
+        },
+        {
+          "id": 171,
+          "name": "融创壹号院园区",
+          "area_name": "白塘",
+          "market_type": "xinfang",
+          "market_label": "新房",
+          "build_year": 2024,
+          "property_type": "住宅",
+          "avg_unit_price": 48582.0,
+          "region_code": "sip",
+          "district": "工业园区"
+        },
+        {
+          "id": 168,
+          "name": "中海甲第坊",
+          "area_name": "湖西",
+          "market_type": "xinfang",
+          "market_label": "新房",
+          "build_year": 2024,
+          "property_type": "住宅",
+          "avg_unit_price": 47057.0,
+          "region_code": "sip",
+          "district": "工业园区"
+        }
+      ]
+    }
+  ],
+  "summary_zh": "覆盖苏州 6 个市辖区（已排除张家港/常熟/太仓/昆山）。；二手均价最高 工业园区约 41265 元/㎡，最低 吴江约 18977 元/㎡；新房均价最高 姑苏约 44736 元/㎡，最低 相城约 22326 元/㎡。"
+}

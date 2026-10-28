@@ -1,0 +1,12 @@
+{# 来源展示：仅真实 http(s) 链家可点；demo 显示徽章+说明 #}
+{% macro source_cell(source, source_url) -%}
+  {% set src = source or '' %}
+  {% set url = source_url or '' %}
+  {% set is_real = url.startswith('http://') or url.startswith('https://') %}
+  {% set is_demo = src == 'demo' or 'demo.local' in url %}
+  {% if is_demo or not is_real %}
+    <span class="badge source-demo" title="本地示意数据，非站点实爬">示意·{{ src or 'demo' }}</span>
+  {% else %}
+    <a href="{{ url }}" target="_blank" rel="noopener">{{ src }}</a>
+  {% endif %}
+{%- endmacro %}

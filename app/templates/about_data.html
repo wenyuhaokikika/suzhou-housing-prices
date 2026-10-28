@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}数据说明 · 苏州各区房价{% endblock %}
+{% block content %}
+<div class="crumb"><a href="/">总览</a> / 数据说明</div>
+<h1>数据来源说明</h1>
+<p class="sub">本看板如何取数、为何出现「示意」标签、如何尝试实盘爬取</p>
+
+<div class="section card">
+  <h2>一句话结论</h2>
+  <p>
+    当前库内主体为 <strong>本地示意数据（source=demo）</strong>：
+    <strong>小区名为苏州市辖区真实可识别小区/楼盘名</strong>，
+    价格与成交为按近年公开市场常见区间<strong>合成</strong>的近三年趋势，
+    <strong>不是</strong>链家/贝壳/安居客等站点的实时实爬结果。
+  </p>
+  <p class="note">
+    原因：在本环境对贝壳（ke.com / lianjia.com）、安居客等发起请求时，多次返回验证码/反爬页或连接失败，
+    无法稳定解析列表；好好选房等站点路径亦不可用。为不影响分析与看板演示，使用了标注清晰的 demo 灌数。
+  </p>
+</div>
+
+<div class="section card">
+  <h2>已实现的采集器</h2>
+  <table>
+    <thead><tr><th>来源标识</th><th>说明</th><th>本环境实测</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>beike</code> / <code>lianjia</code></td>
+        <td>贝壳/链家二手房列表 + 成交列表（限速、UA 轮换、双域名兜底）</td>
+        <td>遇验证码/反爬，未写入有效房源</td>
+      </tr>
+      <tr>
+        <td><code>anjuke</code></td>
+        <td>安居客在售列表</td>
+        <td>遇反爬，未写入有效房源</td>
+      </tr>
+      <tr>
+        <td><code>haohaoxuanfang</code></td>
+        <td>好好选房 / amillion.cn / 公众号好好选房Pro（小程序为主）</td>
+        <td>公开站无列表；需微信环境，已跳过</td>
+      </tr>
+      <tr>
+        <td><code>demo</code></td>
+        <td>本地合成：真实小区名 + 合理价格区间 + 月度快照/挂牌/成交</td>
+        <td>成功，当前看板主要依赖此源</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="section card">
+  <h2>示意数据如何生成</h2>
+  <ul>
+    <li>目录：<code>scrapers/suzhou_communities.py</code>（姑苏/虎丘/吴中/相城/吴江/工业园区）</li>
+    <li>灌数：<code>python -m scrapers.run --region all --demo-only</code></li>
+    <li>字段：<code>source=demo</code>，<code>source_url</code> 为空（不再生成会 404 的假链接）</li>
+    <li>价格：以各小区别名均价为基准，叠加近三年温和波动与噪声，生成挂牌、成交与月度快照</li>
+  </ul>
+</div>
+
+<div class="section card">
+  <h2>如何尝试实盘爬取</h2>
+  <pre style="background:#0f1419;padding:12px;border-radius:8px;overflow:auto;">cd /workspace/housing-prices && source .venv/bin/activate
+python -m scrapers.run --region wuzhong --source beike --max-pages 2
+python -m scrapers.run --region sip --source anjuke --max-pages 2
+</pre>
+  <p class="note">
+    实盘成功写入的行会带有真实 <code>source</code>（如 beike）与可访问的 <code>source_url</code>，详情表中会显示为可点击链接。
+    若仍被反爬，请降低频率、更换网络，或改用官方/合规数据源；切勿绕过登录墙或验证码。
+  </p>
+</div>
+
+
+<div class="section card">
+  <h2>关于「好好选房」公众号 / 小程序</h2>
+  <p>
+    「好好选房Pro」（微信号 <code>haohaoxuanfang</code>）与官网
+    <a href="https://www.amillion.cn/" target="_blank" rel="noopener">amillion.cn</a>
+    主要为<strong>微信小程序/公众号</strong>形态：公开网页几乎只有导流落地页，
+    <strong>没有</strong>可稳定爬取的苏州房源 HTML 列表或开放 API。
+  </p>
+  <p>
+    本仓库已实现 <code>haohaoxuanfang</code> 爬虫探测；本环境实测为
+    <strong>skipped</strong>（小程序落地 / 无列表）。若要从公众号拉数，需要你在
+    <strong>已登录微信的浏览器或手机</strong>中打开小程序/文章，协助抓包导出 JSON，
+    或提供可访问的分享链接后再接入导入器。
+  </p>
+</div>
+
+<div class="section card">
+  <h2>关于「2020 年以后」筛选</h2>
+  <p>
+    示意库已补充大量 <strong>2020–2026 新房</strong>与<strong>近年交付转二手</strong>小区。
+    服务端示例：<code>/regions/wuzhong?year_min=2020</code>、
+    <code>/regions/wuzhong?market=ershou&amp;year_min=2020</code>。
+  </p>
+</div>
+
+<div class="section card">
+  <h2>界面如何区分</h2>
+  <p>
+    来源列若为 <span class="badge source-demo">示意·demo</span>：本地示意，无外链。<br>
+    若为蓝色可点链接：该行来自实爬且 URL 为 http(s)。
+  </p>
+</div>
+{% endblock %}
