@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{% block title %}苏州各区房价{% endblock %}</title>
+  <title>{% block title %}苏州房价预测工具{% endblock %}</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
     :root {
@@ -82,8 +82,9 @@
 </head>
 <body>
   <nav class="nav">
-    <a class="brand" href="/">苏州各区房价</a>
+    <a class="brand" href="/">🏠 苏州房价预测工具</a>
     <a href="/" class="{% if nav=='home' %}active{% endif %}">总览</a>
+    <a href="/predict" class="{% if nav=='predict' %}active{% endif %}">🔮 预测</a>
     <a href="/regions/gusu" class="{% if nav=='gusu' %}active{% endif %}">姑苏</a>
     <a href="/regions/huqiu" class="{% if nav=='huqiu' %}active{% endif %}">虎丘</a>
     <a href="/regions/wuzhong" class="{% if nav=='wuzhong' %}active{% endif %}">吴中</a>

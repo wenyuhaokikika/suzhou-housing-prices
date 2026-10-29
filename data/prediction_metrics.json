@@ -1,0 +1,125 @@
+{
+  "generated_at": "2026-10-29",
+  "data_summary": {
+    "total_records": 10620,
+    "communities": 295,
+    "date_range": {
+      "start": "2023-11-01",
+      "end": "2026-10-01"
+    },
+    "split": {
+      "train": 7433,
+      "validation": 1594,
+      "test": 1593
+    }
+  },
+  "cross_validation": [
+    {
+      "model": "Ridge",
+      "cv_rmse_mean": 269.99,
+      "cv_rmse_std": 55.84,
+      "cv_mae_mean": 221.93,
+      "cv_mae_std": 46.61,
+      "cv_r2_mean": 0.9959,
+      "cv_r2_std": 0.0016
+    },
+    {
+      "model": "RandomForest",
+      "cv_rmse_mean": 521.14,
+      "cv_rmse_std": 277.01,
+      "cv_mae_mean": 311.33,
+      "cv_mae_std": 127.67,
+      "cv_r2_mean": 0.9858,
+      "cv_r2_std": 0.0094
+    },
+    {
+      "model": "GradientBoosting",
+      "cv_rmse_mean": 463.57,
+      "cv_rmse_std": 225.07,
+      "cv_mae_mean": 282.62,
+      "cv_mae_std": 90.48,
+      "cv_r2_mean": 0.9885,
+      "cv_r2_std": 0.0075
+    }
+  ],
+  "train_results": [
+    {
+      "name": "Ridge",
+      "rmse": 285.45,
+      "mae": 229.25,
+      "r2": 0.9984,
+      "mape": 1.23
+    },
+    {
+      "name": "RandomForest",
+      "rmse": 197.0,
+      "mae": 161.89,
+      "r2": 0.9992,
+      "mape": 0.89
+    },
+    {
+      "name": "GradientBoosting",
+      "rmse": 241.13,
+      "mae": 196.69,
+      "r2": 0.9988,
+      "mape": 1.08
+    }
+  ],
+  "validation_results": [
+    {
+      "name": "Ridge",
+      "rmse": 266.32,
+      "mae": 213.92,
+      "r2": 0.9985,
+      "mape": 1.16
+    },
+    {
+      "name": "RandomForest",
+      "rmse": 350.38,
+      "mae": 235.71,
+      "r2": 0.9975,
+      "mape": 1.24
+    },
+    {
+      "name": "GradientBoosting",
+      "rmse": 431.96,
+      "mae": 238.79,
+      "r2": 0.9962,
+      "mape": 1.24
+    }
+  ],
+  "test_results": [
+    {
+      "name": "Ridge",
+      "rmse": 264.15,
+      "mae": 212.82,
+      "r2": 0.9985,
+      "mape": 1.18
+    },
+    {
+      "name": "RandomForest",
+      "rmse": 348.88,
+      "mae": 236.14,
+      "r2": 0.9974,
+      "mape": 1.27
+    },
+    {
+      "name": "GradientBoosting",
+      "rmse": 432.27,
+      "mae": 236.05,
+      "r2": 0.9961,
+      "mape": 1.25
+    }
+  ],
+  "chosen_model": {
+    "name": "Ridge",
+    "reason": "测试集上 RMSE 最低 (264.15), R² 为 0.9985, MAPE 为 1.18%"
+  },
+  "final_metrics": {
+    "name": "Ridge",
+    "rmse": 264.15,
+    "mae": 212.82,
+    "r2": 0.9985,
+    "mape": 1.18
+  }
+}

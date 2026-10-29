@@ -1,4 +1,4 @@
-"""FastAPI：多页房价看板 + JSON API
+"""FastAPI：苏州房价预测工具 + 多页看板 + JSON API
 
 启动: uvicorn app.main:app --host 0.0.0.0 --port 8765
 """
@@ -8,8 +8,8 @@ import os
 import sys
 from typing import Optional, List
 
-from fastapi import FastAPI, Depends, HTTPException, Query, Request, Form
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi import FastAPI, Depends, HTTPException, Query, Request, Form, BackgroundTasks
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import func
@@ -52,11 +52,16 @@ from analysis.trends import (
     discount_pct,
     MARKET_LABEL,
 )
+from analysis.predict import (
+    load_metrics,
+    get_prediction_summary,
+    train_and_evaluate,
+)
 
 app = FastAPI(
-    title="苏州各区房价数据 API",
-    description="苏州市辖区（姑苏/虎丘/吴中/相城/吴江/工业园区）· 不含县级市 · 新房与二手拆分",
-    version="2.0.0",
+    title="苏州房价预测工具 API",
+    description="苏州市辖区（姑苏/虎丘/吴中/相城/吴江/工业园区）房价预测与分析 · 不含县级市",
+    version="3.0.0",
 )
 
 templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "templates"))
@@ -368,6 +373,97 @@ def ui_watch_remove(community_id: int, db: Session = Depends(get_db)):
         db.commit()
     ref = f"/communities/{community_id}"
     return RedirectResponse(url=ref, status_code=303)
+
+
+# ---------- 预测页面 ----------
+
+@app.get("/predict", response_class=HTMLResponse)
+def page_predict(
+    request: Request,
+    community_id: Optional[int] = None,
+    region: Optional[str] = None,
+    months: int = 6,
+    db: Session = Depends(get_db),
+):
+    """房价预测页面"""
+    metrics = load_metrics()
+    regions = db.query(Region).order_by(Region.id).all()
+    
+    query = db.query(Community).order_by(Community.name)
+    communities = []
+    for c in query.all():
+        r = db.get(Region, c.region_id)
+        communities.append({
+            "id": c.id,
+            "name": c.name,
+            "region_code": r.code if r else "unknown",
+        })
+    
+    prediction = None
+    error = None
+    if community_id:
+        try:
+            prediction = get_prediction_summary(community_id, months)
+            if "error" in prediction:
+                error = prediction["error"]
+                prediction = None
+        except Exception as e:
+            error = str(e)
+    
+    return templates.TemplateResponse(
+        request,
+        "predict.html",
+        {
+            "nav": "predict",
+            "metrics": metrics,
+            "regions": regions,
+            "communities": communities,
+            "community_id": community_id,
+            "region": region,
+            "months": months,
+            "prediction": prediction,
+            "error": error,
+        },
+    )
+
+
+# ---------- 预测 API ----------
+
+@app.get("/api/predict/metrics")
+def api_predict_metrics():
+    """获取模型指标"""
+    metrics = load_metrics()
+    if not metrics:
+        raise HTTPException(404, "模型未训练，请先运行 python -m analysis.predict")
+    return metrics
+
+
+@app.get("/api/predict/{community_id}")
+def api_predict_community(
+    community_id: int,
+    months: int = Query(6, ge=1, le=24),
+):
+    """预测指定小区未来房价"""
+    try:
+        result = get_prediction_summary(community_id, months)
+        if "error" in result:
+            raise HTTPException(400, result["error"])
+        return result
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
+
+@app.post("/api/predict/train")
+def api_train_model(background_tasks: BackgroundTasks):
+    """触发模型训练（后台运行）"""
+    def do_train():
+        try:
+            train_and_evaluate(save_model=True)
+        except Exception as e:
+            print(f"训练失败: {e}")
+    
+    background_tasks.add_task(do_train)
+    return RedirectResponse(url="/predict", status_code=303)
 
 
 # ---------- JSON API ----------
