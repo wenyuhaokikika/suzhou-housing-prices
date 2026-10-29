@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% block title %}总览 · 苏州各区房价{% endblock %}
+{% block title %}总览 · 苏州房价预测工具{% endblock %}
 {% block content %}
 <div class="crumb">首页 / 总览</div>
-<h1>苏州市辖区房价看板</h1>
-<p class="sub">主指标为<strong>成交单价</strong>（挂牌仅参考）· 示意数据 · 表头可筛选</p>
+<h1>🏠 苏州房价预测工具</h1>
+<p class="sub">主指标为<strong>成交单价</strong>（挂牌仅参考）· <a href="/predict">🔮 房价预测</a> · 表头可筛选</p>
 
 <div class="grid">
   <div class="card"><div class="label">小区/楼盘</div><div class="value">{{ overview.communities }}</div></div>

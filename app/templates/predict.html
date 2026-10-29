@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+{% block title %}房价预测 · 苏州房价预测工具{% endblock %}
+{% block content %}
+<div class="crumb">首页 / 房价预测</div>
+<h1>🔮 房价预测</h1>
+<p class="sub">基于历史数据的机器学习预测 · 仅供参考，不构成投资建议</p>
+
+{% if metrics %}
+<div class="section card">
+  <h2>📊 模型性能指标</h2>
+  <p class="note">当前模型: <strong>{{ metrics.chosen_model.name }}</strong> · 训练于 {{ metrics.generated_at }}</p>
+  
+  <div class="grid" style="margin-top:16px;">
+    <div class="card">
+      <div class="label">测试集 RMSE</div>
+      <div class="value">{{ '%.1f'|format(metrics.final_metrics.rmse) }}</div>
+      <div class="note">元/㎡</div>
+    </div>
+    <div class="card">
+      <div class="label">测试集 MAE</div>
+      <div class="value">{{ '%.1f'|format(metrics.final_metrics.mae) }}</div>
+      <div class="note">元/㎡</div>
+    </div>
+    <div class="card">
+      <div class="label">R² 决定系数</div>
+      <div class="value">{{ '%.4f'|format(metrics.final_metrics.r2) }}</div>
+    </div>
+    <div class="card">
+      <div class="label">MAPE</div>
+      <div class="value">{{ '%.2f'|format(metrics.final_metrics.mape) }}%</div>
+      <div class="note">平均绝对百分比误差</div>
+    </div>
+  </div>
+
+  <details style="margin-top:16px;">
+    <summary style="cursor:pointer;color:var(--accent);">查看交叉验证详情</summary>
+    <table style="margin-top:12px;">
+      <thead>
+        <tr>
+          <th>模型</th>
+          <th>CV RMSE</th>
+          <th>CV MAE</th>
+          <th>CV R²</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cv in metrics.cross_validation %}
+        <tr>
+          <td>{{ cv.model }}</td>
+          <td>{{ cv.cv_rmse_mean }} ± {{ cv.cv_rmse_std }}</td>
+          <td>{{ cv.cv_mae_mean }} ± {{ cv.cv_mae_std }}</td>
+          <td>{{ cv.cv_r2_mean }} ± {{ cv.cv_r2_std }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p class="note" style="margin-top:8px;">
+      数据量: {{ metrics.data_summary.total_records }} 条记录, {{ metrics.data_summary.communities }} 个小区<br>
+      时间范围: {{ metrics.data_summary.date_range.start }} ~ {{ metrics.data_summary.date_range.end }}<br>
+      划分: 训练={{ metrics.data_summary.split.train }}, 验证={{ metrics.data_summary.split.validation }}, 测试={{ metrics.data_summary.split.test }}
+    </p>
+  </details>
+</div>
+{% else %}
+<div class="section card">
+  <h2>⚠️ 模型未训练</h2>
+  <p>请先运行训练命令：</p>
+  <pre style="background:#1a2332;padding:12px;border-radius:8px;overflow-x:auto;">python -m analysis.predict</pre>
+  <p class="note">或点击下方按钮触发训练（可能需要几分钟）</p>
+  <form action="/api/predict/train" method="POST" style="margin-top:12px;">
+    <button type="submit" class="btn primary">开始训练模型</button>
+  </form>
+</div>
+{% endif %}
+
+<div class="section card">
+  <h2>📈 选择小区预测房价</h2>
+  <form id="predict-form" action="/predict" method="GET" style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;">
+    <div>
+      <label style="display:block;font-size:0.85rem;color:var(--muted);margin-bottom:4px;">区域</label>
+      <select name="region" id="region-select" class="tf-select" style="min-width:120px;">
+        <option value="">全部区域</option>
+        {% for r in regions %}
+        <option value="{{ r.code }}" {% if region == r.code %}selected{% endif %}>{{ r.district }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label style="display:block;font-size:0.85rem;color:var(--muted);margin-bottom:4px;">小区</label>
+      <select name="community_id" id="community-select" class="tf-select" style="min-width:200px;" required>
+        <option value="">请选择小区</option>
+        {% for c in communities %}
+        <option value="{{ c.id }}" data-region="{{ c.region_code }}" {% if community_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label style="display:block;font-size:0.85rem;color:var(--muted);margin-bottom:4px;">预测月数</label>
+      <select name="months" class="tf-select">
+        <option value="3" {% if months == 3 %}selected{% endif %}>3 个月</option>
+        <option value="6" {% if months == 6 %}selected{% endif %}>6 个月</option>
+        <option value="12" {% if months == 12 %}selected{% endif %}>12 个月</option>
+      </select>
+    </div>
+    <button type="submit" class="btn primary">预测</button>
+  </form>
+</div>
+
+{% if prediction %}
+<div class="section card">
+  <h2>🏠 {{ prediction.community.name }} 房价预测</h2>
+  <p class="note">{{ prediction.community.region }} · {{ '二手房' if prediction.community.market_type == 'ershou' else '新房' }}</p>
+  
+  <div class="grid" style="margin:16px 0;">
+    <div class="card">
+      <div class="label">当前均价</div>
+      <div class="value">{{ '%.0f'|format(prediction.current_price) if prediction.current_price else '-' }}</div>
+      <div class="note">元/㎡</div>
+    </div>
+    <div class="card">
+      <div class="label">{{ prediction.summary.months_predicted }} 个月后预测</div>
+      <div class="value" style="color:{% if prediction.summary.change_pct and prediction.summary.change_pct > 0 %}var(--warn){% elif prediction.summary.change_pct and prediction.summary.change_pct < 0 %}var(--good){% else %}var(--text){% endif %}">
+        {{ '%.0f'|format(prediction.summary.predicted_price) if prediction.summary.predicted_price else '-' }}
+      </div>
+      <div class="note">元/㎡</div>
+    </div>
+    <div class="card">
+      <div class="label">预测变化</div>
+      <div class="value" style="color:{% if prediction.summary.change_pct and prediction.summary.change_pct > 0 %}var(--warn){% elif prediction.summary.change_pct and prediction.summary.change_pct < 0 %}var(--good){% else %}var(--text){% endif %}">
+        {% if prediction.summary.change_pct %}{{ '+' if prediction.summary.change_pct > 0 else '' }}{{ '%.2f'|format(prediction.summary.change_pct) }}%{% else %}-{% endif %}
+      </div>
+      <div class="note">{{ prediction.summary.trend }}</div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:20px;">历史 vs 预测走势</h3>
+  <canvas id="prediction-chart" height="280"></canvas>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const history = {{ prediction.history | tojson }};
+  const predictions = {{ prediction.predictions | tojson }};
+  
+  const histLabels = history.map(h => h.date.slice(0, 7));
+  const histPrices = history.map(h => h.price);
+  
+  const predLabels = predictions.map(p => p.date.slice(0, 7));
+  const predPrices = predictions.map(p => p.predicted_price);
+  
+  const allLabels = [...histLabels, ...predLabels];
+  const histData = [...histPrices, ...Array(predLabels.length).fill(null)];
+  const predData = [...Array(histLabels.length - 1).fill(null), histPrices[histPrices.length - 1], ...predPrices];
+  
+  new Chart(document.getElementById('prediction-chart'), {
+    type: 'line',
+    data: {
+      labels: allLabels,
+      datasets: [
+        {
+          label: '历史均价',
+          data: histData,
+          borderColor: '#3d8bfd',
+          backgroundColor: 'rgba(61, 139, 253, 0.1)',
+          fill: true,
+          tension: 0.3,
+        },
+        {
+          label: '预测价格',
+          data: predData,
+          borderColor: '#f5a524',
+          borderDash: [5, 5],
+          backgroundColor: 'rgba(245, 165, 36, 0.1)',
+          fill: true,
+          tension: 0.3,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { labels: { color: '#e7ecf3' } }
+      },
+      scales: {
+        x: { ticks: { color: '#8b9bb4' }, grid: { color: '#243044' } },
+        y: { ticks: { color: '#8b9bb4' }, grid: { color: '#243044' } }
+      }
+    }
+  });
+});
+</script>
+{% endif %}
+
+{% if error %}
+<div class="section card" style="border-color:var(--warn);">
+  <h2>⚠️ 预测失败</h2>
+  <p>{{ error }}</p>
+</div>
+{% endif %}
+
+<div class="section card">
+  <h2>📖 说明</h2>
+  <ul style="color:var(--muted);line-height:1.8;">
+    <li><strong>模型:</strong> 比较 Ridge 回归、随机森林、梯度提升三种算法，选择测试集表现最优者</li>
+    <li><strong>特征:</strong> 时间特征（月份、季度）、滞后价格（1/3/6/12月）、滚动均值、价格变化趋势、区域/类型编码</li>
+    <li><strong>划分:</strong> 时间感知划分 — 训练集 70%（早期数据）、验证集 15%、测试集 15%（近期数据）</li>
+    <li><strong>验证:</strong> 5 折时间序列交叉验证（TimeSeriesSplit）</li>
+    <li><strong>指标:</strong> RMSE（均方根误差）、MAE（平均绝对误差）、R²（决定系数）、MAPE（平均绝对百分比误差）</li>
+  </ul>
+  <p class="note" style="margin-top:12px;">
+    ⚠️ <strong>免责声明:</strong> 本工具仅供学习研究，预测结果不构成任何投资建议。房价受政策、经济等多因素影响，请谨慎参考。
+  </p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const regionSelect = document.getElementById('region-select');
+  const communitySelect = document.getElementById('community-select');
+  const allOptions = Array.from(communitySelect.options);
+  
+  function filterCommunities() {
+    const region = regionSelect.value;
+    communitySelect.innerHTML = '';
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = '请选择小区';
+    communitySelect.appendChild(placeholder);
+    
+    allOptions.forEach(opt => {
+      if (opt.value && (!region || opt.dataset.region === region)) {
+        communitySelect.appendChild(opt.cloneNode(true));
+      }
+    });
+  }
+  
+  regionSelect.addEventListener('change', filterCommunities);
+});
+</script>
+{% endblock %}
